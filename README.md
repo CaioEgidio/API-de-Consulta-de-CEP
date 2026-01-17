@@ -1,4 +1,4 @@
-# 🚀 API de Consulta de CEP com FastAPI
+# API de Consulta de CEP com FastAPI
 
 Uma API simples, rápida e eficiente para consultar informações de endereço a partir de um CEP brasileiro utilizando a API pública do **ViaCEP**. Desenvolvida com **FastAPI**, essa aplicação demonstra boas práticas de criação de endpoints, tratamento de erros e consumo de APIs externas.
 
