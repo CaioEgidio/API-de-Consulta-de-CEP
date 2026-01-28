@@ -35,30 +35,21 @@ Resultado: próximas requisições ficam  rápidas
 
 ---
 
-## Stack
 ### Backend & Linguagem
-<p>
-  <img src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/python.png" alt="Python" height="40" style="margin-right: 10px;"/>
-  <img src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/fastapi.png" alt="FastAPI" height="40"/>
-</p>
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 
-### Banco de Dados e Cache
-<p>
-  <img src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/mongodb.png" alt="MongoDB" height="40" style="margin-right: 10px;"/>
-  <img src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/redis.png" alt="Redis" height="40"/>
-</p>
+### Banco de Dados & Cache
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 
 ### Containers & Infra
-<p>
-  <img src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/docker.png" alt="Docker" height="40" style="margin-right: 10px;"/>
-</p>
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
-### HTTP & API
-<p>
-  <img src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/rest.png" alt="REST" height="40" style="margin-right: 10px;"/>
+### API & Protocolo
+![REST](https://img.shields.io/badge/REST-000000?style=for-the-badge&logo=postman&logoColor=white)
+![HTTP](https://img.shields.io/badge/HTTP-005571?style=for-the-badge&logo=cloudflare&logoColor=white)
 
-  <img src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/http.png" alt="HTTP" height="40"/>
-</p>
 
 * **Python 3.10+**
 * **FastAPI**
