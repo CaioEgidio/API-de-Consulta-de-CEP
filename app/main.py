@@ -1,30 +1,48 @@
 from fastapi import FastAPI, HTTPException
 import requests
+import time
 import redis
 from pymongo import MongoClient
 import json
 from fastapi import FastAPI, Header, HTTPException, status, Depends
 
-
 app = FastAPI()
-
 
 API_KEYS_VALIDAS = {"abc123", "teste456"}
 
+RATE_LIMIT = 100 
+WINDOW = 20  # 20 segundos para a janela de tempo do rate limit 
+
+def verificar_rate_limit(api_key: str):# Verifica o numero de requisições feitas por uma API key 
+    chave = f"rate_limit:{api_key}"# onde vai a chave, para armazenar o numero de requisições daquela API key
+    requisicoes = redis_client.incr(chave)# incrementa o contador de requisições para aquela chave 
+
+    if requisicoes == 1: # Se for a primeira requisição, define o tempo de expiração para a janela de tempo 
+        redis_client.expire(chave, WINDOW)
+   
+    if requisicoes > RATE_LIMIT: # Se o numero de requisições exceder o limite, lança um exeção HTTP 429 
+        raise HTTPException(status_code=429,detail="Limite de requisições excedido. Tente novamente em instantes.")
+    
+def autenticar(x_api_key: str = Header(None)) -> str:# Função que autentica a API key, e combina a obtenção, validação e verificação do rate limit, usando o Header para capturar a chave
+    api_key = obter_api_key(x_api_key)
+    validar_api_key(api_key)
+    verificar_rate_limit(api_key)
+    return api_key # Retorna a API key para ser usada nas rotas, se passar por todas as validações de rate limit 
+
 # função para validar a API key, garante que o campo não esta vazio, se tiver algo continua 
-def obter_api_key(x_api_key: str | None) -> str: # Verifica se a API key esta presente no header
+def obter_api_key(x_api_key: str | None) -> str: # Verifica se a API key esta presente no header  
     if x_api_key is None: # Se a API key não for fornecida 
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail= "API key ausente")# Lança uma exceção HTTP
     return x_api_key # Retorna a API key para ser validada a seguir 
 
 
 # Função de que valida a API key usando o Header, recebe a string que já foi capturada e a compara com a lista de chaves
-def validar_api_key(api_key: str) -> None: # Verifica se a API key é valida 
+def validar_api_key(api_key: str) -> None: # Verifica se a API key é valida, none significa que a função não retorna nada 
     if api_key not in API_KEYS_VALIDAS:# se a chave não for valida 
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="API key invalida")
     
 # Função de dependencia que combina a obtenção e validação da API key, usa as rotas do FastAPI (usando o Depends) 
-def autenticar(x_api_key: str = Header(None)) -> None: 
+def autenticador(x_api_key: str = Header(None)) -> None: 
     api_key = obter_api_key(x_api_key) # Obtem a API key do header e valida
     validar_api_key(api_key) 
     
@@ -42,7 +60,7 @@ URL = "https://viacep.com.br/ws/"
 TTL = 86400  # 24 horas 60*60*24 
 
 @app.get("/cep/{cep}")
-def consultar_cep(cep: str, _: None = Depends(autenticar)):
+def consultar_cep(cep: str, api_key: str = Depends(autenticar)):
     # 1. Tenta buscar no REDIS (Cache)
     cached = redis_client.get(cep)# Verifica se o CEP esta no cache
     if cached:# se econtrou no cache
