@@ -1,9 +1,9 @@
 import redis
 import json
 
-class RedisRepository:
-    def __init__(self, host="redis", port=6379):
-        self.redis_client = redis.Redis(host=host, port=port, db=0, decode_responses=True)
+class RedisRepository: 
+    def __init__(self, host="redis", port=6379): 
+        self.redis_client = redis.Redis(host=host, port=port, db=0, decode_responses=True) 
         self.ttl = 86400 # 24 horas
 
     def get(self, cep: str): # Busca o valor no Redis usando o CEP como chave

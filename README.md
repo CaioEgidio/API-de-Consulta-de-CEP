@@ -1,130 +1,92 @@
-# API de Consulta de CEP com Cache e Banco de Dados
+API de Consulta de CEP (Arquitetura DDD & SOLID)
+Uma API backend em FastAPI que consulta dados de CEP usando a ViaCEP, com sistema inteligente de cache em Redis e persistência em MongoDB.
 
-Uma API backend em **FastAPI** que consulta dados de CEP usando a **ViaCEP**, com sistema inteligente de **cache em Redis** e persistência em **MongoDB** para performance, escalabilidade e economia de requisições externas.
+Este projeto foi refatorado para aplicar os princípios do Domain-Driven Design (DDD) e SOLID, garantindo um código altamente escalável, testável e de fácil manutenção.
 
-Projeto ideal para quem quer aprender sobre:
+🚀 O que há de novo? (Evolução da Arquitetura)
+O projeto evoluiu de uma estrutura simples para uma arquitetura em camadas focada no domínio:
 
-* Arquitetura de cache
-* Integração com APIs externas
-* Banco NoSQL (MongoDB)
-* Containers com Docker
-* Boas práticas em backend
+Domain Layer (app/domain): Contém os modelos de dados (como a entidade Address) e os contratos/interfaces (ICacheRepository, IDatabaseRepository, IExternalApi), aplicando o princípio de Inversão de Dependência (D do SOLID).
 
----
+Application Layer (app/application): Orquestra a regra de negócio através do CepService, decidindo quando buscar no cache, no banco ou na API externa.
 
-## Como funciona (Fluxo de Consulta)
+Infrastructure Layer (app/infrastructure): Implementações concretas das interfaces, isolando a lógica de acesso ao MongoDB, Redis e ViaCEP.
 
-Quando você faz uma requisição para um CEP, a API segue esse caminho:
+Além disso, novas features de segurança foram implementadas:
 
-```
+🔐 Autenticação com API Key: Rotas agora são protegidas e exigem um header de autorização.
+
+⏱️ Rate Limiting: Bloqueio de abusos utilizando o Redis (limite de 100 requisições a cada 20 segundos por chave).
+
+⚙️ Como funciona (Fluxo de Consulta)
+Quando você faz uma requisição para um CEP, a API segue esse caminho na camada de serviço:
+
+Plaintext
 Cliente → Redis (cache) → MongoDB → ViaCEP (API externa)
-```
+Ordem de prioridade:
+Redis (Cache) → Resposta instantânea ⚡
 
-### Ordem de prioridade:
+MongoDB → Se não estiver no cache 🗄️
 
-1. **Redis (Cache)** → Resposta instantânea ⚡
-2. **MongoDB** → Se não estiver no cache
-3. **ViaCEP API** → Se não estiver salvo em lugar nenhum
+ViaCEP API → Se não estiver salvo em lugar nenhum 🌐
 
-Depois que consulta na ViaCEP:
+Depois que consulta na ViaCEP, a API salva os dados no MongoDB e no Redis com um TTL de 24 horas (86400 segundos).
 
-* Salva no **MongoDB**
-* Salva no **Redis (TTL de 24h)**
+🛠️ Tecnologias Utilizadas
+Python 3.12
 
-Resultado: próximas requisições ficam  rápidas 
+FastAPI (Framework Web)
 
----
+Redis (Cache e Rate Limit)
 
-### Backend & Linguagem
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+MongoDB (Persistência)
 
-### Banco de Dados & Cache
-![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+Docker & Docker Compose (Infraestrutura)
 
-### Containers & Infra
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+Pydantic (Validação de Dados)
 
-### API & Protocolo
-![REST](https://img.shields.io/badge/REST-000000?style=for-the-badge&logo=postman&logoColor=white)
-![HTTP](https://img.shields.io/badge/HTTP-005571?style=for-the-badge&logo=cloudflare&logoColor=white)
-
-
-* **Python 3.10+**
-* **FastAPI**
-* **Redis** (cache)
-* **MongoDB** (persistência)
-* **Docker & Docker Compose**
-* **ViaCEP API**
-
----
-
-## Estrutura do Projeto
-
-```
+📂 Estrutura do Projeto
+Plaintext
 API-de-Consulta-de-CEP/
 │
 ├── app/
-│   └── main.py
+│   ├── application/     # Casos de uso e serviços (CepService)
+│   ├── domain/          # Entidades (Address) e Interfaces abstratas
+│   ├── infrastructure/  # Repositórios (Redis, Mongo) e chamadas externas (ViaCEP)
+│   └── main.py          # Entrypoint, Injeção de Dependências e Rotas
 ├── docker-compose.yml
 ├── Dockerfile
 ├── requirements.txt
-├── .env.example
-├── .gitignore
+├── .env
 └── README.md
-```
+🚀 Rodando com Docker (Recomendado)
+1️⃣ Crie suas variáveis de ambiente
+Crie um arquivo .env na raiz do projeto:
 
----
-
-## Variáveis de Ambiente
-
-Crie um arquivo `.env` baseado no `.env.example`:
-
-```
+Snippet de código
 MONGO_HOST=mongo
 MONGO_PORT=27017
 REDIS_HOST=redis
 REDIS_PORT=6379
-```
-
----
-
-## Rodando com Docker (Recomendado)
-
-### 1️⃣ Suba os containers
-
-```bash
+2️⃣ Suba os containers
+Bash
 docker-compose up --build
-```
+A API estará disponível em 👉 http://localhost:8000.
 
-### 2️⃣ Acesse a API
+A documentação interativa (Swagger) pode ser acessada em 👉 http://localhost:8000/docs.
 
-* API:
-  👉 [http://localhost:8000](http://localhost:8000)
-
-* Documentação automática (Swagger):
-  👉 [http://localhost:8000/docs](http://localhost:8000/docs)
-
----
-
-## Testando a API
-
-### Endpoint
-
-```
+🧪 Testando a API
+Endpoint
 GET /cep/{cep}
-```
 
-### Exemplo
+Atenção: A API agora exige o envio de uma chave de acesso válida através do Header x-api-key.
+Chaves de teste disponíveis por padrão: abc123 ou teste456.
 
-```bash
-curl http://localhost:8000/cep/01001000
-```
-
-### Resposta
-
-```json
+Exemplo via cURL
+Bash
+curl -H "x-api-key: abc123" http://localhost:8000/cep/01001000
+Exemplo de Resposta
+JSON
 {
   "source": "cache",
   "data": {
@@ -135,74 +97,11 @@ curl http://localhost:8000/cep/01001000
     "uf": "SP"
   }
 }
-```
-
-### Campo `source`
-
-| Valor     | Significado                |
-| --------- | -------------------------- |
-| `cache`   | Veio do Redis ⚡            |
-| `mongodb` | Veio do banco de dados 🗄️ |
-| `api`     | Veio da ViaCEP 🌐          |
-
----
-
-## Cache
-
-* TTL configurado para: **24 horas (86400 segundos)**
-* Após esse tempo, o Redis apaga o registro automaticamente
-* Na próxima requisição, a API busca no MongoDB ou ViaCEP
-
----
-
-##  Dependências
-
-Arquivo `requirements.txt`:
-
-```
-fastapi
-uvicorn
-requests
-redis
-pymongo
-```
-
----
-
-##  Conceitos Aplicados
-
-* Cache First Strategy
-* Integração com API externa
-* Banco NoSQL
-* Arquitetura em containers
-* Performance backend
-* Separação de responsabilidades
-
----
-
-##  Próximas Features (Ideias)
-
-* 🔐 Autenticação com API Key
-* 📊 Dashboard de métricas (quantas consultas por CEP)
-* ⏱️ Rate limit por IP
-* 🌍 Suporte a múltiplos serviços de CEP
-* 📦 Deploy na AWS / Railway / Render
-
----
-
-## Autor
-
-**Caio Egidio**
-Estudante de Ciência da Computação 
+👨‍💻 Autor
+Caio Egidio
+Estudante de Ciência da Computação
 
 Se esse projeto te ajudou, deixa uma ⭐ no repositório — isso dá buff de motivação nível lendário 😄🔥
 
----
-
-## Licença
-
-Este projeto está sob a licença MIT.
-Sinta-se livre para usar, estudar, modificar e evoluir.
-
----
-
+📄 Licença
+Este projeto está sob a licença MIT. Sinta-se livre para usar, estudar, modificar e evoluir.
